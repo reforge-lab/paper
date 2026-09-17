@@ -1,0 +1,50 @@
+% !TEX root = ../main.tex
+
+\newgeometry{top=35mm}
+%\renewcommand{\cftdot}{}
+
+\addcontentsline{toc}{section}{List of Tables}
+\begin{center}
+\listoffigures
+\end{center}
+
+\newpage
+\newgeometry{top=35mm}
+%\renewcommand{\cftdot}{}
+\addcontentsline{toc}{section}{List of Figures}
+\begin{center}
+\listoftables
+\end{center}
+
+\newpage
+\newgeometry{top=35mm}
+%\renewcommand{\cftdot}{}
+\begin{center}
+
+\section*{\size{\textbf{LIST OF SYMBOLS / ABBREVIATIONS}}}  
+
+\begin{tabular}{p{3cm} p{10cm}}
+\textbf{Symbol} & \textbf{Description} \\[1ex]
+CNN & Convolutional Neural Network \\
+CT & Computed Tomography \\
+GAN & Generative Adversarial Network \\
+ACC & Accuracy \\
+SPECY & Specificity \\
+SENS & Sensitivity \\
+\end{tabular}
+
+\end{center}
+\addcontentsline{toc}{section}{List of Symbols and Abbreviations}
+\newgeometry{top=35mm}
+
+\renewcommand*\contentsname{\size\textbf{TABLE OF CONTENTS}}
+
+
+%\renewcommand{\cftdot}{}
+\begin{center}
+\tableofcontents  
+\end{center}
+
+
+\restoregeometry
+

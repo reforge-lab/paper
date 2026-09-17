@@ -1,0 +1,40 @@
+# Core LaTeX intermediate files
+*.aux
+*.bbl
+*.blg
+*.brf
+*.bcf
+*.run.xml
+*.fdb_latexmk
+*.fls
+*.lof
+*.log
+*.lot
+*.out
+*.toc
+*.idx
+*.ilg
+*.ind
+*.synctex.gz
+*.synctex(busy)
+
+# Beamer / presentation extras
+*.nav
+*.snm
+*.vrb
+
+# Build and cache folders
+build/
+out/
+.texpadtmp/
+_minted-*/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary / editor files
+*~
+*.swp
+*.bak
