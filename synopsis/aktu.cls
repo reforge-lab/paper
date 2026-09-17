@@ -482,20 +482,18 @@ reserved.\par\permission}}
 \choosecase{\bigsize \textbf{Computer Science and Engineering-AIML}}
 \par
 \size\textbf{by} \par
-\choosecase{\bigsize\textbf{Name}}
-\choosecase{\normal(\textbf{Roll No.) }}\par
-\choosecase{\bigsize\textbf{Name}}
-\choosecase{\normal(\textbf{Roll No.) }}\par
-\choosecase{\bigsize\textbf{Name}}
-\choosecase{\normal(\textbf{Roll No.) }}\par
-\choosecase{\bigsize\textbf{Name}}
-\choosecase{\normal(\textbf{Roll No.) }}\par
+\choosecase{\bigsize\textbf{Kashish Gupta}}
+\choosecase{\normal(\textbf{2300911530066) }}\par
+\choosecase{\bigsize\textbf{Vertika Singh}}
+\choosecase{\normal(\textbf{2300911530132) }}\par
+\choosecase{\bigsize\textbf{Avinash Kumar Ankur}}
+\choosecase{\normal(\textbf{2300911530036) }}\par
 \choosecase{\normal\textbf{Under the Supervision of}}
 \par
-\choosecase{\size\textbf{Supervisor Name}}
+\choosecase{\size\textbf{Ms. Priya Singh}}
 \\
 \choosecase{Department of Computer Science and Engineering-AIML}\\
-\choosecase{JSS Academy of Technical Education ,Noida}\\
+\choosecase{JSS Academy of Technical Education, Noida}\\
 \par
 \begin{center}
    \includegraphics[width=5cm,height=5cm]{assets/JSS.png} 
