@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "packageVersion": "2.3.0",
+  "installedSkills": {
+    "git-commit": {
+      "version": "2.3.0"
+    },
+    "git-stage": {
+      "version": "2.3.0"
+    },
+    "humanizer": {
+      "version": "2.3.0"
+    }
+  }
+}
