@@ -1,3 +1,85 @@
 % !TEX root = ../main.tex
-\chapter{SCOPE OF THE PROJECT}
+\chapter{Scope of the Project}
+\label{chap:scope}
 
+\section{System Architecture and Layer Decomposition}
+The scope of the Reforge project spans four interconnected technological tiers, ensuring a comprehensive implementation from core smart contracts to empirical research tooling:
+
+\begin{enumerate}
+    \item \textbf{Smart Contract Execution Layer:}
+    Implements decentralized financial logic in Solidity ($\ge 0.8.24$) using the Foundry toolchain. The layer manages user balances, computes collateral health factors, enforces the discrete auction lifecycle, and executes flash repayments and collateral payouts atomically.
+    
+    \item \textbf{Backend Coordination and Event Pipeline:}
+    Developed in Node.js and TypeScript using the Fastify framework. It maintains persistent WebSocket connections to the blockchain RPC, detects blocks where positions breach $HF = 1.0$, manages auction state transitions using Redis and BullMQ, and evaluates competing liquidator bids using the Net Economic Value scoring function.
+    
+    \item \textbf{Frontend User Interface and Telemetry Portal:}
+    Built with Next.js 16, React 19, and Tailwind CSS. The interface provides end-users with collateral health dashboards, presents liquidators with a real-time auction marketplace, and offers researchers interactive visualization tools.
+    
+    \item \textbf{Empirical Research and Simulation Engine:}
+    Constructed in Python 3.12 utilizing NumPy, Pandas, and Matplotlib. It simulates synthetic price shocks, replays historical Ethereum market downturns, and benchmarks the economic outcomes of batch auctions against Priority Gas Auctions.
+\end{enumerate}
+
+Figure~\ref{fig:system_architecture} illustrates the cross-tier dataflow and interaction among these four operational components.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    node distance=0.8cm and 0.8cm,
+    comp/.style={rectangle, draw=black!80, fill=black!3, rounded corners=2pt, minimum width=2.8cm, minimum height=0.75cm, align=center, font=\scriptsize},
+    arrow/.style={-{Stealth[scale=0.8]}, line width=0.7pt}
+]
+
+% Tier 1: Frontend
+\node[comp] (nextjs) at (0, 4.0) {Next.js 16 Web App\\(Dashboard \& Bidding)};
+\node[comp] (wallet) at (4.5, 4.0) {Web3 Wallet / wagmi\\(EIP-712 Signing)};
+
+% Tier 2: Backend
+\node[comp] (listener) at (-3.4, 2.2) {Block Listener\\(viem WebSocket)};
+\node[comp] (queue) at (0.5, 2.2) {Redis \& BullMQ\\(Auction Queue)};
+\node[comp] (engine) at (4.4, 2.2) {Auction Coordinator\\(NEV Scoring)};
+
+% Tier 3: Contracts
+\node[comp] (pool) at (-3.4, 0.4) {\texttt{LendingPool.sol}\\(Collateral \& Debt)};
+\node[comp] (auction) at (0.5, 0.4) {\texttt{LiquidationAuction.sol}\\(Batch Window)};
+\node[comp] (dex) at (4.4, 0.4) {\texttt{MockDEX.sol}\\(Swap \& Slippage)};
+
+% Tier 4: Research
+\node[comp] (db) at (-1.5, -1.4) {PostgreSQL / Timescale\\(Historical Events)};
+\node[comp] (sim) at (2.5, -1.4) {Python Sim Engine\\(Monte Carlo Benchmarks)};
+
+% Connections
+\draw[arrow] (nextjs) -- (wallet);
+\draw[arrow] (wallet) -- (queue);
+\draw[arrow] (listener) -- (queue);
+\draw[arrow] (queue) -- (engine);
+\draw[arrow] (engine) -- (auction);
+\draw[arrow] (pool) -- (auction);
+\draw[arrow] (auction) -- (dex);
+\draw[arrow] (auction) -- (db);
+\draw[arrow] (db) -- (sim);
+
+\end{tikzpicture}
+\caption{End-to-end multi-tier system architecture of the Reforge liquidation platform.}
+\label{fig:system_architecture}
+\end{figure}
+
+\section{Operational Assumptions and Boundaries}
+To maintain a well-defined project scope, Reforge operates under specific foundational parameters:
+\begin{itemize}
+    \item \textbf{Target Blockchain Environment:} The protocol is designed for Ethereum Mainnet and EVM-compatible Layer-2 rollups (such as Arbitrum and Optimism) that maintain deterministic block execution.
+    \item \textbf{Oracle Architecture:} Asset valuations rely on external decentralized price oracles (such as Chainlink) with standard heartbeat and deviation update thresholds.
+    \item \textbf{Auction Window Duration:} The discrete batch auction window is bounded between 1 and 2 blocks (approximately 12 to 24 seconds on Ethereum L1). This duration balances adequate liquidator participation against the risk of rapid price depreciation.
+\end{itemize}
+
+\section{The Latency vs. Solvency Trade-off}
+A central analytical challenge within the project scope is evaluating the \textbf{Auction Latency Problem}. In conventional protocols, liquidation is continuous and instantaneous: the first transaction submitted in the next block clears the loan. Reforge introduces an explicit time window of 1--2 blocks to collect and score competing bids.
+
+During this brief window, if the collateral price experiences an extreme flash crash, the position could deteriorate into negative equity (where debt value exceeds total collateral value) before settlement occurs. Quantifying this exact trade-off---whether the massive reduction in MEV gas waste and preserved borrower equity outweighs the marginal risk of auction latency---constitutes a core focus of our research simulation.
+
+\section{Out-of-Scope Boundaries}
+The following aspects are explicitly excluded from the current project scope:
+\begin{itemize}
+    \item \textbf{Cross-Chain Atomic Settlement:} Multi-chain liquidations spanning distinct consensus layers via bridges are excluded; all settlement occurs natively on a single EVM state machine.
+    \item \textbf{Under-Collateralized Lending:} The system focuses exclusively on overcollateralized lending pools; identity-based credit scoring or zero-collateral lending is out of scope.
+    \item \textbf{Proprietary Off-Chain Bot Strategies:} The project specifies the protocol-level scoring mechanism and reference liquidator interfaces, but does not encompass proprietary high-frequency trading arbitrage algorithms.
+\end{itemize}

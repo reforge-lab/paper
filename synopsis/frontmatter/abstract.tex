@@ -1,2 +1,8 @@
 % !TEX root = ../main.tex
 
+Decentralized finance (DeFi) lending protocols rely on automated liquidations to maintain protocol solvency when collateral values fall below defined health thresholds. In public blockchain networks like Ethereum, liquidation calls submitted to the public mempool expose transactions to predatory Maximal Extractable Value (MEV) extraction, such as front-running, sandwich attacks, and priority gas auctions (PGAs). These competitive auctions consume disproportionate network bandwidth, drive up transaction fees, and induce latency that often leads to liquidation failure and bad debt accumulation for protocols.
+
+This project proposes an MEV-Aware DeFi Liquidation System designed to execute undercollateralized debt liquidations efficiently while mitigating negative externalities associated with public mempool competition. The proposed framework integrates private transaction order flows, dynamic auction routing, and predictive health-factor monitoring powered by machine learning algorithms. By analyzing historical mempool dynamics, on-chain volatility, and slippage thresholds, the system schedules and bundles liquidations to bypass public searcher races. The expected outcome is a robust, low-latency liquidation mechanism that minimizes value leakage to searchers, preserves collateral recovery value for borrowers, and enhances protocol solvency across high-volatility market regimes.
+
+\vspace{1.5em}
+\noindent\textbf{Keywords:} Decentralized Finance (DeFi), Maximal Extractable Value (MEV), Lending Protocols, Liquidations, Front-running, Solvency, Machine Learning.

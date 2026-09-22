@@ -1,2 +1,63 @@
 % !TEX root = ../main.tex
-\chapter{HARDWARE \& SOFTWARE REQUIREMENTS}
+\chapter{Hardware \& Software Requirements}
+\label{chap:requirements}
+
+The development, deployment, and simulation of the Reforge platform require a robust engineering stack spanning blockchain execution clients, high-throughput backend services, interactive user interfaces, and scientific research environments.
+
+\section{Software Requirements}
+The software ecosystem is decomposed into four functional tiers, as detailed in Table~\ref{tab:software_requirements}.
+
+\begin{table}[htbp]
+\centering
+\small
+\renewcommand{\arraystretch}{0.85}
+\caption{Comprehensive software technology stack for the Reforge protocol.}
+\label{tab:software_requirements}
+\begin{tabular}{p{2.6cm}|p{2.6cm}|p{1.8cm}|p{6.6cm}}
+\hline
+\textbf{Subsystem} & \textbf{Technology} & \textbf{Version} & \textbf{Role \& Functionality} \\
+\hline
+\textbf{Smart Contracts} & Solidity & $\ge$ 0.8.24 & Core contract logic with transient storage support. \\
+& Foundry (\texttt{forge}) & Latest & Compilation, fuzzing, and invariant testing. \\
+& Anvil & Local Node & High-speed local EVM node with state manipulation. \\
+& OpenZeppelin & v5.0 & Standard ERC-20, SafeERC20, and ReentrancyGuard. \\
+\hline
+\textbf{Backend} & Node.js & v22 LTS & Asynchronous execution runtime for I/O event loops. \\
+& TypeScript & v5.x & Strict static typing across API and RPC schemas. \\
+& Fastify & v4.x & Low-overhead REST API server for liquidator bids. \\
+& viem & v2.x & Lightweight Ethereum client with WebSocket listeners. \\
+& Redis \& BullMQ & v7.x & In-memory job queue for auction timers and events. \\
+& PostgreSQL & v16 & Relational storage for historical bids and telemetry. \\
+\hline
+\textbf{Frontend Views} & Next.js & 16.3.0 & React 19 App Router with Turbopack compilation. \\
+& Tailwind CSS & v4.0 & Utility-first responsive styling engine. \\
+& wagmi / viem & Latest & React hooks for Web3 wallet connection and signing. \\
+\hline
+\textbf{Research \& Sim} & Python & 3.12 & Data science, numerical modeling, and simulation. \\
+& NumPy \& SciPy & Latest & Vectorized health factor and price trajectory models. \\
+& Pandas & Latest & Tabular data processing for multi-run auction logs. \\
+& Matplotlib & Latest & Publication-quality charts for empirical evaluation. \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Hardware Requirements}
+Executing local EVM test forks, running asynchronous WebSocket listeners, and processing large-scale Monte Carlo price trajectory simulations necessitate high-performance workstation hardware. Table~\ref{tab:hardware_requirements} outlines the minimum and recommended specifications.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Hardware specifications for development and simulation nodes.}
+\label{tab:hardware_requirements}
+\begin{tabular}{p{3.2cm}|p{5.2cm}|p{5.2cm}}
+\hline
+\textbf{Component} & \textbf{Minimum Specification} & \textbf{Recommended Specification} \\
+\hline
+\textbf{Processor (CPU)} & Quad-core Intel Core i5 or Ryzen 5 & 8-core Intel Core i7/i9 or Ryzen 7/9 \\
+\textbf{System Memory} & 16 GB DDR4 & 32 GB DDR5 (for in-memory simulation) \\
+\textbf{Storage (SSD)} & 256 GB NVMe SSD & 1 TB NVMe PCIe 4.0 SSD \\
+\textbf{Network} & 50 Mbps broadband & 100+ Mbps low-latency fiber \\
+\textbf{Operating System} & Windows 11 / Ubuntu 22.04 LTS & Ubuntu 24.04 LTS or WSL2 \\
+\hline
+\end{tabular}
+\end{table}

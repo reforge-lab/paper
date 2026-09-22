@@ -1,3 +1,86 @@
 % !TEX root = ../main.tex
 \chapter{Motivation}
+\label{chap:motivation}
 
+\section{The Failure of Priority Gas Auctions}
+The primary motivation behind this research stems from the structural inefficiencies of first-come, first-served liquidations in transparent blockchain networks. When a borrower's account falls below $HF = 1.0$, the protocol creates an open-access profit opportunity. Multiple independent searcher bots identify the position within the same second and race to submit liquidation transactions.
+
+Because blockchain miners and Proof-of-Stake block proposers order transactions within a block by descending priority fee (gas price), searchers enter a Priority Gas Auction (PGA). A typical sequence unfolds as follows:
+\begin{enumerate}
+    \item \textbf{Bot A} detects the liquidation with an expected gross profit of \$500 and submits a transaction offering a 20 Gwei priority fee.
+    \item \textbf{Bot B} detects the same opportunity and broadcasts a replacement transaction offering 45 Gwei.
+    \item \textbf{Bot C} outbids with 90 Gwei, prompting Bot B to make a final push at 140 Gwei.
+    \item The block builder includes Bot B's transaction at the top of the block and rejects or fails all competing bids.
+\end{enumerate}
+
+Figure~\ref{fig:pga_sequence} illustrates this competitive escalation and value capture in the public mempool.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    actor/.style={rectangle, draw=black!80, fill=black!5, rounded corners=2pt, minimum width=2.6cm, minimum height=0.7cm, align=center, font=\small\bfseries},
+    msg/.style={-{Stealth[scale=0.9]}, line width=0.7pt, font=\scriptsize},
+    note/.style={rectangle, draw=black!50, dashed, fill=black!2, font=\scriptsize, align=center, text width=5.5cm},
+    line/.style={dashed, line width=0.5pt, black!50}
+]
+% Lifelines
+\node[actor] (bots) at (0,0) {Searcher Bots};
+\node[actor] (mempool) at (5.2,0) {Public Mempool};
+\node[actor] (validator) at (10.4,0) {Block Builder / Validator};
+
+\draw[line] (bots) -- ++(0,-5.4);
+\draw[line] (mempool) -- ++(0,-5.4);
+\draw[line] (validator) -- ++(0,-5.4);
+
+% Sequence events
+\draw[msg] (0,-0.8) -- node[above] {1. Bot A bids 20 Gwei (expected \$500 gross)} (5.2,-0.8);
+\draw[msg] (0,-1.5) -- node[above] {2. Bot B outbids: 45 Gwei} (5.2,-1.5);
+\draw[msg] (0,-2.2) -- node[above] {3. Bot C outbids: 90 Gwei} (5.2,-2.2);
+\draw[msg] (0,-2.9) -- node[above] {4. Bot B final push: 140 Gwei (\$220 bribe)} (5.2,-2.9);
+
+\draw[msg] (5.2,-3.7) -- node[above] {5. Selects highest priority bribe (Bot B)} (10.4,-3.7);
+\draw[msg] (10.4,-4.4) -- node[above] {6. Settles liquidation (Bot B wins, others fail)} (0,-4.4);
+
+\node[note] at (5.2,-5.0) {Builder extracts \$220 pure MEV;\\Bot B retains \$250; losing bots burn failed gas.};
+
+\end{tikzpicture}
+\caption{Sequence of a Priority Gas Auction showing competitive gas escalation and validator value capture.}
+\label{fig:pga_sequence}
+\end{figure}
+
+\begin{table}[htbp]
+\centering
+\caption{Economic breakdown of a typical Priority Gas Auction liquidation.}
+\label{tab:pga_breakdown}
+\begin{tabular}{l|r|r|r|r}
+\hline
+\textbf{Participant} & \textbf{Gross Profit} & \textbf{Gas Paid} & \textbf{DEX Slippage} & \textbf{Net Profit} \\
+\hline
+Bot A (Failed) & \$500.00 & \$40.00 & \$0.00 & -\$40.00 \\
+Bot B (Winner) & \$500.00 & \$220.00 & \$30.00 & \textbf{\$250.00} \\
+Bot C (Failed) & \$500.00 & \$150.00 & \$0.00 & -\$150.00 \\
+\hline
+\textbf{Validator / Builder} & --- & \textbf{+\$220.00} & --- & \textbf{+\$220.00} \\
+\hline
+\end{tabular}
+\end{table}
+
+As summarized in Table~\ref{tab:pga_breakdown}, the winning liquidator surrendered \$220 (44\% of gross margin) to the block builder, while the losing bots burned gas on reverted calls. The borrower bore the full economic cost of this \$500 penalty, but the majority of the surplus was extracted by consensus intermediaries rather than utilized to secure the lending platform.
+
+\section{Excessive Borrower Collateral Loss}
+Traditional lending protocols impose a fixed liquidation penalty, typically 5\% to 10\% of the repaid debt. This fixed discount is arbitrary: whether the market for the underlying collateral is highly liquid with tight spreads, or illiquid during an extreme crash, the distressed borrower is penalized by the exact same percentage.
+
+Empirical studies by Qin et al. (2021) and Tian and Xu (2025) demonstrate that fixed-spread protocols force borrowers to forfeit substantial equity that could have otherwise been preserved. In contrast, competitive auction mechanisms allow liquidators to bid for the minimum required discount necessary to clear debt. Data from the Bank of Canada (2025) shows that transitioning from fixed discounts to competitive auctions reduces average liquidation discounts from 5.0\% to 1.8\%---a 64\% reduction in unnecessary borrower loss.
+
+\section{Secondary Market Slippage and Cascades}
+Liquidators rarely hold seized collateral long-term; they instantly sell it on decentralized exchanges (such as Uniswap or Curve) to repay the flash loans utilized to finance the liquidation. During market downturns, dozens of liquidation sales hit the same Automated Market Maker (AMM) pools within a short window. This causes localized price slippage, driving the oracle price lower and triggering secondary waves of liquidations across neighboring platforms.
+
+\section{Builder Monopolies and Access Centralization}
+With the advent of Proposer-Builder Separation (PBS) through MEV-Boost, MEV extraction has shifted from public mempools into private builder markets. Recent empirical measurements by Wang et al. (2024) show that the top three block builders construct over 95\% of all Ethereum blocks. Furthermore, vertically integrated searcher-builders enjoy structural latency and informational advantages over independent liquidators. This centralization undermines the decentralized ethos of DeFi and creates single points of economic failure.
+
+\section{Core Research Questions}
+To address these compounding challenges, this research investigates two central questions:
+\begin{enumerate}
+    \item \textbf{Research Question 1:} Does competitive MEV extraction in public mempools make DeFi liquidations unnecessarily expensive and amplify borrower losses?
+    \item \textbf{Research Question 2:} Can the liquidation mechanism be redesigned so that competition is evaluated on net economic efficiency rather than a race to submit the highest gas bribe?
+\end{enumerate}

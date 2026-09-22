@@ -1,4 +1,92 @@
 % !TEX root = ../main.tex
-\chapter{RELATED WORK}
+\chapter{Related Work}
+\label{chap:related_work}
+
+The design and evaluation of Reforge builds directly upon recent academic breakthroughs spanning DeFi liquidation mechanics, Maximal Extractable Value (MEV), Proposer-Builder Separation (PBS), and consensus-level order-fairness.
+
+\section{Empirical Studies on DeFi Liquidations}
+A critical pillar of lending protocol stability is understanding how liquidation mechanisms behave under real market stress:
+
+\begin{itemize}
+    \item \textbf{Qin et al. (IMC 2021):} Conducted the first large-scale empirical evaluation of liquidations across Aave, Compound, MakerDAO, and dYdX~\cite{qin2021empirical}. The authors demonstrated that static liquidation discounts (5\%--10\%) transfer oversized economic surplus from distressed borrowers to liquidators. Even in highly liquid market environments with minimal execution frictions, borrowers were forced to forfeit the full fixed penalty. Furthermore, they proved that liquidators strategically optimize partial repayments and gas bids to maximize extraction.
+    
+    \item \textbf{Tian and Xu (Bank of Canada 2025):} Provided direct empirical comparison between fixed-spread models (Aave) and competitive Dutch auctions (MakerDAO)~\cite{tian2025liquidation}. Their findings reveal that competitive auctions reduce average liquidation discounts from 5.0\% to 1.8\% (a 64\% reduction) and cut secondary market price impact by 81\% (from 0.054\% to 0.010\%). Their analysis highlights two competing economic forces: the \textit{participation effect} (auctions attract more diverse searchers) and the \textit{competition effect} (bidding drives clearance prices closer to fair market value).
+\end{itemize}
+
+\section{MEV Foundations and Priority Gas Auctions}
+The theoretical and empirical understanding of transaction reordering in transparent mempools is rooted in seminal MEV research:
+
+\begin{itemize}
+    \item \textbf{Daian et al. (Flash Boys 2.0, IEEE S\&P 2019):} First formalized Maximal Extractable Value and demonstrated that pending transactions in public mempools invite automated Priority Gas Auctions (PGAs)~\cite{daian2019flashboys}. The authors proved that when extractable value is large relative to block subsidies, rational miners are economically incentivized to execute ``time-bandit attacks''---reorganizing historical blocks to steal past MEV opportunities.
+    
+    \item \textbf{Qin et al. (Quantifying BEV, IEEE S\&P 2022):} Measured over \$540.54 million in extracted MEV across 32 months of Ethereum mainnet data~\cite{qin2022quantifying}. The study demonstrated that liquidations constitute 26\% of all extracted value (second only to DEX arbitrage), with single liquidation events yielding profits up to \$4.1 million.
+\end{itemize}
+
+\section{Proposer-Builder Separation and Private Flow}
+With the introduction of MEV-Boost following Ethereum's transition to Proof-of-Stake, the structural dynamics of MEV shifted into specialized builder auctions:
+
+\begin{itemize}
+    \item \textbf{Pai and Resnick (2023):} Analyzed the structural advantages enjoyed by vertically integrated searcher-builders in MEV-Boost auctions~\cite{pai2023integrated}. They proved that integrated builders observe competing bundles with zero external communication latency and effectively participate in second-price auction dynamics, while independent liquidators face the ``winner's curse''.
+    
+    \item \textbf{Wang et al. (2024):} Empirically measured private order flow dynamics on Ethereum, demonstrating that the top three block builders construct over 95\% of all blocks~\cite{wang2024private}. This market concentration proves that private builder channels do not eliminate unfair competition, but rather centralize it.
+    
+    \item \textbf{Natale and Moser (2023):} Investigated artificial latency games in PBS, showing that block proposers systematically delay block proposals by 500--1000ms to extract a median 1.28\% increase in MEV bribes~\cite{natale2023artificial}.
+\end{itemize}
+
+Figure~\ref{fig:pbs_supply_chain} illustrates the modern MEV supply chain operating between searchers, block builders, and consensus validators under PBS.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    node distance=1.2cm,
+    stage/.style={rectangle, draw=black!80, fill=black!4, rounded corners=3pt, minimum width=2.4cm, minimum height=0.9cm, align=center, font=\scriptsize},
+    arrow/.style={-{Stealth[scale=0.8]}, line width=0.7pt}
+]
+\node[stage] (searchers) {Searchers / Liquidators\\(Bundle Creation)};
+\node[stage, right=1.0cm of searchers] (builders) {Block Builders\\(Block Assembly)};
+\node[stage, right=1.0cm of builders] (relays) {MEV-Boost Relays\\(Bid Verification)};
+\node[stage, right=1.0cm of relays] (validators) {Validators / Proposers\\(Chain Commitment)};
+
+\draw[arrow] (searchers) -- node[above, font=\tiny] {Bundles} (builders);
+\draw[arrow] (builders) -- node[above, font=\tiny] {Blocks} (relays);
+\draw[arrow] (relays) -- node[above, font=\tiny] {Headers} (validators);
+
+\end{tikzpicture}
+\caption{The modern MEV supply chain under Proposer-Builder Separation (PBS).}
+\label{fig:pbs_supply_chain}
+\end{figure}
+
+\section{Order-Fairness and Security Taxonomies}
+\begin{itemize}
+    \item \textbf{Kelkar et al. (CRYPTO 2020):} Introduced the concept of \textit{order-fairness} for Byzantine consensus protocols (the Aequitas family)~\cite{kelkar2020order}, proving that standard consensus safety and liveness guarantees do not protect against sequence manipulation by block proposers.
+    
+    \item \textbf{Eskandari et al. (FC 2019):} Formulated the canonical front-running taxonomy: displacement, insertion, and suppression~\cite{eskandari2019sok}. Standard mempool liquidation races represent pure displacement attacks, where searchers copy and outbid competitors.
+    
+    \item \textbf{Werner et al. (2021) and Gogol et al. (2024):} Systematized DeFi risk frameworks~\cite{werner2021sok,gogol2024sok}, demonstrating that lending protocol insolvency arises from external economic incentive failures and mempool latency games rather than smart contract coding bugs.
+\end{itemize}
+
+\section{Comparative Synthesis Matrix}
+Table~\ref{tab:lit_comparison} synthesizes how Reforge compares against prevailing liquidation architectures in decentralized finance.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Architectural comparison of liquidation mechanisms across DeFi protocols.}
+\label{tab:lit_comparison}
+\begin{tabular}{p{2.2cm}|p{3.0cm}|p{3.0cm}|p{3.2cm}|p{2.2cm}}
+\hline
+\textbf{Protocol} & \textbf{Mechanism Type} & \textbf{Pricing Model} & \textbf{MEV Resistance} & \textbf{Borrower Equity} \\
+\hline
+Aave v3 & First-come Mempool & Fixed Penalty (5--10\%) & None (PGA Gas Wars) & Low (Static Loss) \\
+Compound v3 & First-come Mempool & Fixed Penalty (5--8\%) & None (PGA Gas Wars) & Low (Static Loss) \\
+MakerDAO & Dutch Auction & Descending Price Curve & Moderate (Latency Bidding) & Medium (Dynamic) \\
+\textbf{Reforge} & \textbf{Batch Auction} & \textbf{Net Economic Value} & \textbf{High (Order-Fair)} & \textbf{High (Maximized)} \\
+\hline
+\end{tabular}
+\end{table}
+
 \section{Conclusion}
+The literature confirms that while conventional liquidation systems successfully maintain protocol solvency during benign market conditions, their reliance on first-come public mempool races imposes severe costs: excessive borrower collateral loss, catastrophic gas wars, and block-builder centralization. Existing auction designs, while superior to fixed spreads, remain susceptible to latency exploitation and builder monopolies. This establishes a clear need for Reforge's application-level batch clearing mechanism.
+
 \section{Future Scope}
+Future extensions of this work include integrating zero-knowledge proofs (ZKPs) for private bid commitments, extending the batch clearing model to cross-chain lending protocols via LayerZero or Chainlink CCIP, and applying reinforcement learning algorithms to dynamically adjust the discrete auction window duration in response to real-time market volatility.

@@ -1,3 +1,54 @@
 % !TEX root = ../main.tex
-\chapter{PREDICTED TIMELINE FOR THE PROJECT 
-   }
+\chapter{Predicted Timeline for the Project}
+\label{chap:timeline}
+
+The implementation and scientific evaluation of Reforge are structured across an eight-month academic timeline, partitioned into six distinct engineering and research phases.
+
+\section{Phase Breakdown and Sprint Structure}
+The project employs an iterative development methodology with bi-weekly development sprints to ensure continuous integration, testing, and empirical feedback:
+
+\begin{itemize}
+    \item \textbf{Phase 1: Literature Review \& Mathematical Modeling (Months 1--2):}
+    Comprehensive synthesis of academic literature on MEV, Proposer-Builder Separation, and DeFi liquidation mechanisms. Formal derivation and parameter tuning of the Net Economic Value (NEV) scoring equation.
+    
+    \item \textbf{Phase 2: Smart Contract Core Development (Months 3--4):}
+    Implementation of the core Solidity contracts (\texttt{LendingPool.sol}, \texttt{LiquidationAuction.sol}, \texttt{HealthFactorLib.sol}). Writing automated unit tests, fuzz testing suites, and invariant checks in Foundry.
+    
+    \item \textbf{Phase 3: Real-Time Backend Coordination Pipeline (Months 4--5):}
+    Constructing the Node.js/TypeScript backend services, including WebSocket RPC block subscription, Redis/BullMQ opportunity scheduling, and the off-chain bid ingestion and scoring coordinator.
+    
+    \item \textbf{Phase 4: Frontend Web Portal \& Marketplace Terminal (Months 5--6):}
+    Developing the Next.js 16 user interface, integrating wallet connection hooks via wagmi/viem, rendering live liquidation auctions, and building the interactive research telemetry console.
+    
+    \item \textbf{Phase 5: Empirical Simulation \& Benchmark Experiments (Months 6--7):}
+    Constructing the Python-based Monte Carlo market simulation engine. Running stress tests under historical market shock conditions (e.g., March 2020 Black Thursday, May 2022 Terra-Luna collapse) to evaluate collateral retention and latency trade-offs against baseline PGA mechanisms.
+    
+    \item \textbf{Phase 6: Analysis, Documentation \& Thesis Compilation (Months 7--8):}
+    Synthesizing simulation results, drafting academic research papers, completing formal thesis documentation, and preparing the final project defense presentation.
+\end{itemize}
+
+\section{Milestone Schedule}
+Table~\ref{tab:project_milestones} details the projected milestone deliverables across each phase.
+
+\begin{table}[htbp]
+\centering
+\caption{Detailed project milestones and timeline schedule.}
+\label{tab:project_milestones}
+\begin{tabular}{c|p{4.5cm}|c|p{6.0cm}}
+\hline
+\textbf{Phase} & \textbf{Milestone Task} & \textbf{Timeline} & \textbf{Key Deliverable} \\
+\hline
+\textbf{1} & Literature Survey \& NEV Formulation & Month 1--2 & Literature review synthesis and formal scoring specification. \\
+\hline
+\textbf{2} & Smart Contract Implementation & Month 3--4 & Foundry test suite with $>$95\% code coverage and invariant tests. \\
+\hline
+\textbf{3} & Real-Time Backend Engine & Month 4--5 & Functional WebSocket listener and Redis queue scoring service. \\
+\hline
+\textbf{4} & Next.js Web Interface & Month 5--6 & Live protocol dashboard, auction terminal, and telemetry UI. \\
+\hline
+\textbf{5} & Empirical Simulation & Month 6--7 & Monte Carlo experimental benchmark dataset and comparative plots. \\
+\hline
+\textbf{6} & Documentation \& Defense & Month 7--8 & Final B.Tech project synopsis, thesis dissertation, and defense slides. \\
+\hline
+\end{tabular}
+\end{table}

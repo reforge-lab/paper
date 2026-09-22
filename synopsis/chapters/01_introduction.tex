@@ -1,4 +1,61 @@
 % !TEX root = ../main.tex
-\chapter{Introduction} 
+\chapter{Introduction}
+\label{chap:intro}
 
+\section{Background and DeFi Lending}
+Decentralized Finance (DeFi) lending platforms such as Aave, Compound, and MakerDAO allow users to deposit cryptocurrency assets as collateral and borrow other digital assets against them. Unlike traditional banking systems that evaluate borrower creditworthiness through centralized credit scores or legal recourse, DeFi lending protocols operate entirely on overcollateralization. Borrowers must deposit collateral whose market value substantially exceeds the principal amount borrowed.
 
+To continuously gauge loan solvency, protocols calculate a composite metric termed the \textbf{Health Factor} ($HF$):
+\begin{equation}
+HF = \frac{\sum_{i} \left( C_i \times P_i \times LT_i \right)}{\sum_{j} \left( D_j \times P_j \right)}
+\label{eq:health_factor}
+\end{equation}
+where $C_i$ represents the quantity of deposited collateral asset $i$, $P_i$ denotes its current oracle price, $LT_i$ denotes the asset-specific liquidation threshold (typically 75\%--85\%), and $D_j \times P_j$ represents the total outstanding debt evaluated in reference currency.
+
+As long as $HF > 1.0$, the position remains solvent. However, when asset price volatility causes the collateral value to fall or the borrowed asset to appreciate, the health factor drops below unity ($HF < 1.0$). At this exact threshold, the loan is designated as undercollateralized, and the protocol permits external participants---known as liquidators---to repay a fraction of the outstanding debt in exchange for seizing borrower collateral at a discounted rate.
+
+\section{The Problem with Public Mempool Liquidations}
+In conventional protocols, liquidation operates on a first-come, first-served execution model. The first valid transaction included in a block successfully liquidates the debt and claims the liquidation bonus (typically 5\% to 10\%). Because this bonus can translate into thousands of dollars in risk-free profit, dozens of automated searcher bots compete simultaneously for the exact same liquidation opportunity.
+
+In public blockchain networks such as Ethereum, pending transactions reside in a transparent mempool before inclusion. When searchers detect an undercollateralized position, they engage in \textbf{Priority Gas Auctions (PGAs)}. Each bot observes competitor bids and repeatedly broadcasts replacement transactions with higher priority gas fees to incentivize block validators to place their transaction first.
+
+This competitive dynamic triggers severe systemic externalities:
+\begin{itemize}
+    \item \textbf{Economic Value Leakage:} Competitive searchers surrender 70\% to 90\% of their gross liquidation profit directly to block builders and validators as gas bribes, diverting capital away from the lending ecosystem.
+    \item \textbf{Unnecessary Borrower Collateral Loss:} Fixed liquidation discounts penalize borrowers heavily, regardless of whether secondary market conditions actually require such discounts to achieve liquidation.
+    \item \textbf{Mempool Congestion and Failed Transactions:} Thousands of competing liquidation transactions fail every day, consuming block space and driving up baseline gas costs for ordinary network users.
+    \item \textbf{Cascading Market Slippage:} Liquidators typically dump seized collateral immediately on Automated Market Makers (AMMs) like Uniswap to lock in profits, depressing market prices and triggering secondary liquidations across neighboring protocols.
+\end{itemize}
+
+\section{Proposed Solution: The Reforge Architecture}
+This project develops and evaluates \textbf{Reforge}, an MEV-aware batch auction liquidation mechanism for DeFi lending protocols. Instead of running an uncoordinated race in the public mempool, Reforge aggregates competing liquidator bids within a discrete, short time window (1--2 blocks) and evaluates them based on \textbf{Net Economic Value} rather than the size of a gas bribe.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    node distance=1.2cm and 1.5cm,
+    every node/.style={font=\small},
+    block/.style={rectangle, draw=black!80, fill=black!4, rounded corners=3pt, text width=3.2cm, minimum height=1.1cm, align=center, line width=0.8pt},
+    mempool/.style={rectangle, draw=black!80, dashed, fill=black!2, text width=3.2cm, minimum height=1.1cm, align=center, line width=0.8pt},
+    arrow/.style={-{Stealth[scale=1.0]}, line width=0.8pt}
+]
+% Nodes
+\node[block] (monitor) {On-Chain Monitor\\(Health Factor $< 1.0$)};
+\node[block, right=1.6cm of monitor] (evaluator) {MEV Risk Evaluator\\(Gas \& Slippage Model)};
+\node[block, below=1.2cm of monitor] (private) {Private Bundle Router\\(Flashbots / MEV-Share)};
+\node[mempool, below=1.2cm of evaluator] (public) {Public Mempool\\(PGA Competition)};
+\node[block, below=1.2cm of private, xshift=2.4cm] (protocol) {Lending Protocol\\(Debt Repaid, Collateral Seized)};
+
+% Paths
+\draw[arrow] (monitor) -- (evaluator);
+\draw[arrow] (evaluator) -- node[left, font=\scriptsize] {Protected} (private);
+\draw[arrow, dashed] (evaluator) -- node[right, font=\scriptsize] {Standard} (public);
+\draw[arrow] (private) -- (protocol);
+\draw[arrow, dashed] (public) -- (protocol);
+
+\end{tikzpicture}
+\caption{Transaction flow comparison between private MEV-aware bundling and standard public mempool liquidations.}
+\label{fig:liquidation_pipeline}
+\end{figure}
+
+Figure~\ref{fig:liquidation_pipeline} compares standard public mempool execution against our MEV-aware pipeline. By establishing an orderly auction process, Reforge aligns incentives across all three primary stakeholders: borrowers retain more residual equity, protocols prevent bad debt accumulation through deterministic single-transaction settlement, and liquidators earn predictable margins based on execution quality rather than gas expenditure.

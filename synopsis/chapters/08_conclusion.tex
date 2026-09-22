@@ -1,2 +1,21 @@
 % !TEX root = ../main.tex
-\chapter{CONCLUSION}
+\chapter{Conclusion}
+\label{chap:conclusion}
+
+Decentralized lending protocols are foundational building blocks of the decentralized financial ecosystem, yet their reliance on first-come, first-served liquidations in public mempools has introduced severe systemic vulnerabilities. As demonstrated by recent empirical literature, Priority Gas Auctions cause 70\% to 90\% of gross liquidation profits to leak to consensus block builders, force distressed borrowers to forfeit excessive collateral via static penalty rates, and exacerbate secondary market price slippage through uncoordinated collateral dumping.
+
+This project introduces \textbf{Reforge}, an end-to-end MEV-aware batch auction liquidation mechanism designed to replace predatory gas-bidding races with objective economic efficiency. By accumulating competing liquidator bids across a discrete, short auction window (1--2 blocks) and evaluating bids via the \textbf{Net Economic Value} metric:
+\begin{equation}
+\mathrm{NEV} = V_{\mathrm{gross}} - C_{\mathrm{gas}} - C_{\mathrm{slippage}}
+\end{equation}
+Reforge ensures that liquidations are awarded to participants who execute with the lowest transaction overhead and minimal secondary market price impact.
+
+The system is comprehensively architected across four modular tiers:
+\begin{enumerate}
+    \item \textbf{EVM Smart Contracts:} Delivering robust collateral custody, lending pools, discrete auction lifecycles, and atomic settlement routines implemented in Solidity.
+    \item \textbf{High-Performance Backend Pipeline:} Providing real-time WebSocket block listening, asynchronous job queue scheduling via Redis/BullMQ, and off-chain bid ingestion and scoring.
+    \item \textbf{User and Liquidator Portal:} Offering a modern Next.js 16 web interface for protocol health telemetry and liquidator auction participation.
+    \item \textbf{Empirical Simulation Engine:} Enabling reproducible Monte Carlo benchmarking across historical crash regimes to quantify the precise trade-off between auction latency and protocol solvency.
+\end{enumerate}
+
+By aligning the economic incentives of borrowers, protocols, and liquidators, Reforge demonstrates that application-level mechanism redesign can successfully mitigate MEV extraction. The project provides an open-source, academically grounded blueprint for building more resilient, fair, and capital-efficient lending architectures in decentralized finance.
