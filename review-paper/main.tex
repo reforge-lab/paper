@@ -115,54 +115,87 @@ commonly used for MEV-aware liquidation.
 \section{Literature Review}
 \label{sec:litreview}
 
-This section places seven representative studies side by side and
+This section places twelve representative studies side by side and
 compares them directly, rather than treating each as an isolated
 citation. The studies were chosen to span the full liquidation
-pipeline: detection of extractable value, measurement of its cost on
-the public mempool, measurement of its cost inside private order flow,
-and proposed fixes at the consensus and mechanism-design layers.
-Table~\ref{tab:litreview} summarizes each study's focus, method, and
-main limitation, and the discussion that follows groups the studies by
-the layer of the pipeline they address and compares their findings
-against one another.
+pipeline: empirical borrower impact in liquidations, detection of extractable value,
+measurement of its cost on the public mempool, structural concentration inside
+private order flow, and proposed fixes at the consensus and mechanism-design layers.
+Table~\ref{tab:litreview} summarizes each study's focus, method, key findings, and
+main limitations across these four pipeline tiers. The discussion that follows groups the
+studies by the layer of the pipeline they address and compares their empirical and
+theoretical findings against one another.
 
 \begin{table*}[!t]
-\caption{Comparison of seven representative studies on MEV and DeFi liquidation.}
+\caption{Comparison of twelve representative studies on MEV and DeFi liquidation across the transaction lifecycle.}
 \label{tab:litreview}
 \centering
 \renewcommand{\arraystretch}{1.25}
-\begin{tabular}{p{3.0cm}p{3.6cm}p{5.6cm}p{4.6cm}}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{p{3.0cm}p{3.1cm}p{6.4cm}p{4.5cm}}
 \toprule
-\textbf{Study} & \textbf{Method} & \textbf{Key finding} & \textbf{Main limitation} \\
+\textbf{Paper / Study} & \textbf{Method / Focus} & \textbf{Key findings \& empirical metrics} & \textbf{Main limitations} \\
 \midrule
-Daian et al.~\cite{daian2019flash} (2019) &
-Systems framework, case studies &
-Coined and formalized MEV; unified front-running and reordering across DEXs and lending &
-Largely conceptual; offers no liquidation-specific measurement \\
-Qin et al.~\cite{qin2021empirical} (2021) &
+\multicolumn{4}{l}{\textit{\textbf{A. DeFi Liquidations and Borrower Impact}}} \\
+\midrule
+\textbf{DeFi Liquidations}\newline Qin et al.~\cite{qin2021empirical} (2021) &
 Large-scale on-chain measurement &
-Quantifies borrower loss from priority-gas competition across real liquidations &
-Measures only the existing priority-fee regime, not alternative auctions \\
-Torres et al.~\cite{torres2021frontrunner} (2021) &
+Quantifies borrower loss from priority-gas competition; static discounts (5\%--10\%) transfer excessive borrower equity &
+Measures only the existing priority-fee regime, not alternative dynamic auctions \\
+\textbf{Auction Impacts}\newline Bank of Canada~\cite{bankofcanada2025} (2025) &
+Empirical and financial stability analysis &
+Competitive Dutch auctions cut liquidation discounts from 5.0\% to 1.8\% (64\% reduction) and price impact by 81\% &
+Focuses on MakerDAO collateral types; sensitive to auction duration parameter tuning \\
+\midrule
+\multicolumn{4}{l}{\textit{\textbf{B. MEV Foundations and Priority Gas Auctions}}} \\
+\midrule
+\textbf{Flash Boys 2.0}\newline Daian et al.~\cite{daian2019flash} (2019) &
+Systems framework, case studies &
+Formalized MEV and PGAs; proved uncoordinated mempool bidding induces consensus instability and time-bandit forks &
+Conceptual framework; offers no liquidation-specific empirical measurement \\
+\textbf{Frontrunner Jones}\newline Torres et al.~\cite{torres2021frontrunner} (2021) &
 Empirical detection over $\sim$11M blocks &
-$\sim$200{,}000 front-running incidents found, liquidation races among them &
-Detection heuristics may undercount activity hidden in private pools \\
-Weintraub et al.~\cite{weintraub2022flashbot} (2022) &
-Empirical measurement of a private pool &
-Flashbots-connected miners held $>$99.9\% of hashing power in the period studied &
-Single dominant provider studied; result is time- and provider-bound \\
-Kelkar et al.~\cite{kelkar2020order} (2020) &
-Protocol design, formal proofs &
-Defines order-fairness guarantees at the consensus layer &
-No liquidation-specific evaluation or latency cost estimate \\
-Heimbach and Wattenhofer~\cite{heimbach2022sok} (2022) &
-Systematization of knowledge (SoK) &
-No surveyed countermeasure satisfies low latency, manipulation resistance, and decentralization at once &
-Comparative and qualitative; introduces no new measurement \\
-Wang et al.~\cite{wang2024private} (2024) &
+Identified $\sim$200{,}000 front-running incidents ($\sim$1.8\% of blocks), liquidation races among them &
+Detection heuristics may undercount activity routed through private builder pools \\
+\textbf{Quantifying BEV}\newline Qin et al.~\cite{qin2022quantifying} (2022) &
+Empirical measurement over 32 months &
+Quantified $>$540M USD in extracted MEV; liquidations comprise 26\% of total extracted value ($<$4.1M USD single events) &
+Retrospective measurement across PoW/early Merge; does not evaluate auction mechanisms \\
+\textbf{SoK: Front-Running}\newline Eskandari et al.~\cite{eskandari2019sok} (2019) &
+Taxonomy of front-running attacks &
+Canonical taxonomy (displacement, insertion, suppression); frames priority-gas races as pure displacement attacks &
+Predates modern MEV terminology, PBS relays, and private mempool infrastructure \\
+\midrule
+\multicolumn{4}{l}{\textit{\textbf{C. Proposer-Builder Separation and Private Order Flow}}} \\
+\midrule
+\textbf{Flash(bot) in the Pan}\newline Weintraub et al.~\cite{weintraub2022flashbot} (2022) &
+Empirical measurement of private pool &
+Flashbots-connected miners held $>$99.9\% of PoW hashing power; reveals private pools relocate rather than remove concentration &
+Single dominant provider studied; findings reflect the pre-Merge mining market \\
+\textbf{Integrated Builders}\newline Pai and Resnick~\cite{pai2023structural} (2023) &
+Auction-theoretic modeling &
+Integrated searcher-builders gain zero-latency bundle visibility, subjecting independent searchers to winner's curse &
+Stylized theoretical model; does not evaluate empirical on-chain liquidation traces \\
+\textbf{Private Order Flows}\newline Wang et al.~\cite{wang2024private} (2024) &
 Empirical and game-theoretic analysis &
-Documents growing bidding concentration among a small number of block builders &
-Forward-looking projection; concentration trend depends on how PBS evolves \\
+Documents bidding monopolies: top 3 block builders assemble $>$95\% of blocks via exclusive private flow &
+Concentration trajectory depends on evolving PBS market rules and relay dynamics \\
+\textbf{Artificial Latency}\newline Natale and Moser~\cite{natale2023cost} (2023) &
+Empirical measurement of PBS timing &
+Proposers systematically delay block proposals by 500--1000\,ms to extract a median 1.28\% increase in MEV bribes &
+Measures consensus proposer timing games rather than application-layer auction clearing delays \\
+\midrule
+\multicolumn{4}{l}{\textit{\textbf{D. Order-Fairness and Mechanism Countermeasures}}} \\
+\midrule
+\textbf{Order-Fairness (Aequitas)}\newline Kelkar et al.~\cite{kelkar2020order} (2020) &
+Protocol design, formal proofs &
+Defines order-fairness guarantees (Aequitas), proving standard consensus does not prevent transaction reordering &
+High communication complexity; lacks liquidation-specific evaluation or latency cost estimate \\
+\textbf{SoK: Reordering}\newline Heimbach and Wattenhofer~\cite{heimbach2022sok} (2022) &
+Systematization of knowledge (SoK) &
+Formulates the MEV trilemma: no surveyed countermeasure satisfies low latency, manipulation resistance, and decentralization &
+Qualitative comparative survey; introduces no primary empirical liquidation datasets \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -511,8 +544,6 @@ execution cost, borrower loss, protocol recovery, and block-builder
 interaction within one consistent experimental framework, which remains
 an open problem for future work.
 
-\clearpage
-\balance
 
 \begin{thebibliography}{15}
 
